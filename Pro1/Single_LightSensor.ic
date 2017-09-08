@@ -2,10 +2,12 @@
 #define LEFT 2
 #define FORWARD 3
 #define STOP 4
-#define TIMEOUT 1250//5000
-//#define DEBUG
+#define TIMEOUT 1250
 
 //change to bot: added tracks to front tires
+//Lowered the sensor
+//removed the bumper to create more room and remove the shadow
+//added brackets to hold the handyboard
 
 void forward(int rightSpeed, int leftSpeed)
 {
@@ -37,17 +39,18 @@ void turn_left(int ret)
 {
     //Move left
     if(!ret)
-      {
+    {
         motor(0, -50);
         motor(2, -50);
     }
     else
-      {
+    {
         motor(0, 50);
         motor(2, 50);
     }
 }
 
+//Turn off both motors
 void stop(void)
 {
     off(0);
@@ -64,27 +67,33 @@ int check_right(int passLimit)
     
     //Check if we found the tape
     while(counter < TIMEOUT)
-      {
+    {
+        //Check the current sensor value
         value = check_sensor();
+        
+        //Check if the value is in range
         if((value > (passLimit - 10)) && (value < (passLimit + 10)))
-          {
+        {
             return 1;
         }
         
         counter++;
     }
     
+    //stop turning the bot
     stop();
     
     //If tape no found reset bot position
     counter = 0;
     turn_right(1);
     
+    //reset the bot's position
     while(counter < (TIMEOUT + TIMEOUT) + 500)
     {     
         counter++;
     }
     
+    //return false
     return 0;
 }
 
@@ -98,108 +107,100 @@ int check_left(int passLimit)
     
     //Check if we found the tape
     while(counter < TIMEOUT)
-      {
+    {
+        //Check the sensor value
         value = check_sensor();
+        
+        //If the value is in range return true
         if((value > (passLimit - 10)) && (value < (passLimit + 10)))
-          {
+        {
             return 1;
         }
         
         counter++;
     }
     
+    //stop turning the bot
     stop();
     
     //If tape no found reset bot position
     counter = 0;
     turn_left(1);
     
+    //Reset the bot's position
     while(counter < (TIMEOUT + TIMEOUT) + 500)
     {     
         counter++;
     }
     
+    //we have not found the tape
     return 0;
 }
 
 int main(void)
 {
+    //variables
     int direction = FORWARD;
     int value;
     int passLimit = 0;
-    //forward();
-    //printf("Start\n");
+    
     while(start_button() == 0);
     
-    #ifdef DEBUG
-      passLimit = passLimit + check_sensor();
-        passLimit = passLimit + check_sensor();
-        passLimit = passLimit + check_sensor();
+    //Get the average Light sensor value
+    passLimit = passLimit + check_sensor();
+    passLimit = passLimit + check_sensor();
+    passLimit = passLimit + check_sensor();
     passLimit = passLimit / 3;
-    forward(-50,50);
-      //printf("Val: %d", check_left(passLimit));
-    //turn_right(0);
-    sleep(2.0);
-      stop();
-    
-    #else
-    
-                      passLimit = passLimit + check_sensor();
-        passLimit = passLimit + check_sensor();
-        passLimit = passLimit + check_sensor();
-            passLimit = passLimit / 3;
     
     while(1)
-      {        
+    {        
         switch(direction)
-          {
+        {
             case FORWARD:
-      
-            
-            //printf("Pass: %d", passLimit);
-            
             value = check_sensor();
-            //printf("Avg: %d", passLimit);
-            //sleep(5.0);
-            //printf("Ana: %d", value);
-            //sleep(5.0);
-            while((value > (passLimit - 10)) && (value < (passLimit + 10)))
-            {
+            
+              //As long as we have found the tape, move forawrd
+              while((value > (passLimit - 10)) && (value < (passLimit + 10)))
+              {
+                //move forward
                 forward(-50, 50);
+                
+                //Check the new sensor value
                 value = check_sensor();
-                //stop();
-                //printf("Ana: %d", value);
-                //sleep(3.0);
-            }
-            direction = RIGHT;
-            break;
+              }
+            
+              //When we lose the tape we will check right
+              direction = RIGHT;
+              break;
             case RIGHT:
+              //Check if the tape is to the right of the bot
               if(check_right(passLimit) == 1)
               {
                 direction = FORWARD;
-            } 
-            else
+              } 
+              else
               {
+                //check left
                 direction = LEFT;
-            }
-            break;
+              }
+              break;
             case LEFT:
+              //Check if the tape is to the left of the bot
               if(check_left(passLimit) == 1)
               {
                 direction = FORWARD;
-            }
-            else
+              }
+              else
               {
+                //We have lost the tape, just stop
                 printf("Lost or end");
                 direction = STOP;
-            }
-            break;
+              }
+              break;
             default:
               stop();
-            direction = STOP;
-            break;
+              direction = STOP;
+              break;
         }
-        
     }  
-    #endif
 }
