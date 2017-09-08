@@ -1,0 +1,205 @@
+#define RIGHT 1
+#define LEFT 2
+#define FORWARD 3
+#define STOP 4
+#define TIMEOUT 1250//5000
+//#define DEBUG
+
+//change to bot: added tracks to front tires
+
+void forward(int rightSpeed, int leftSpeed)
+{
+    motor(0, rightSpeed);
+    motor(2, leftSpeed);
+}
+
+int check_sensor(void)
+{
+    return analog(5);
+}
+
+void turn_right(int ret)
+{
+    //Move right
+    if(!ret)
+      {
+        motor(0, 50);
+        motor(2, 50);
+    }
+    else
+      {
+        motor(0, -50);
+        motor(2, -50);
+    }
+}
+
+void turn_left(int ret)
+{
+    //Move left
+    if(!ret)
+      {
+        motor(0, -50);
+        motor(2, -50);
+    }
+    else
+      {
+        motor(0, 50);
+        motor(2, 50);
+    }
+}
+
+void stop(void)
+{
+    off(0);
+    off(2);
+}
+
+int check_right(int passLimit)
+{
+    int counter = 0;
+    int value;
+    
+    //Move right
+    turn_right(0);
+    
+    //Check if we found the tape
+    while(counter < TIMEOUT)
+      {
+        value = check_sensor();
+        if((value > (passLimit - 10)) && (value < (passLimit + 10)))
+          {
+            return 1;
+        }
+        
+        counter++;
+    }
+    
+    stop();
+    
+    //If tape no found reset bot position
+    counter = 0;
+    turn_right(1);
+    
+    while(counter < (TIMEOUT + TIMEOUT) + 500)
+    {     
+        counter++;
+    }
+    
+    return 0;
+}
+
+int check_left(int passLimit)
+{
+    int counter = 0;
+    int value;
+    
+    //Move left
+    turn_left(0);
+    
+    //Check if we found the tape
+    while(counter < TIMEOUT)
+      {
+        value = check_sensor();
+        if((value > (passLimit - 10)) && (value < (passLimit + 10)))
+          {
+            return 1;
+        }
+        
+        counter++;
+    }
+    
+    stop();
+    
+    //If tape no found reset bot position
+    counter = 0;
+    turn_left(1);
+    
+    while(counter < (TIMEOUT + TIMEOUT) + 500)
+    {     
+        counter++;
+    }
+    
+    return 0;
+}
+
+int main(void)
+{
+    int direction = FORWARD;
+    int value;
+    int passLimit = 0;
+    //forward();
+    //printf("Start\n");
+    while(start_button() == 0);
+    
+    #ifdef DEBUG
+      passLimit = passLimit + check_sensor();
+        passLimit = passLimit + check_sensor();
+        passLimit = passLimit + check_sensor();
+    passLimit = passLimit / 3;
+    forward(-50,50);
+      //printf("Val: %d", check_left(passLimit));
+    //turn_right(0);
+    sleep(2.0);
+      stop();
+    
+    #else
+    
+                      passLimit = passLimit + check_sensor();
+        passLimit = passLimit + check_sensor();
+        passLimit = passLimit + check_sensor();
+            passLimit = passLimit / 3;
+    
+    while(1)
+      {        
+        switch(direction)
+          {
+            case FORWARD:
+      
+            
+            //printf("Pass: %d", passLimit);
+            
+            value = check_sensor();
+            //printf("Avg: %d", passLimit);
+            //sleep(5.0);
+            //printf("Ana: %d", value);
+            //sleep(5.0);
+            while((value > (passLimit - 10)) && (value < (passLimit + 10)))
+            {
+                forward(-50, 50);
+                value = check_sensor();
+                //stop();
+                //printf("Ana: %d", value);
+                //sleep(3.0);
+            }
+            direction = RIGHT;
+            break;
+            case RIGHT:
+              if(check_right(passLimit) == 1)
+              {
+                direction = FORWARD;
+            } 
+            else
+              {
+                direction = LEFT;
+            }
+            break;
+            case LEFT:
+              if(check_left(passLimit) == 1)
+              {
+                direction = FORWARD;
+            }
+            else
+              {
+                printf("Lost or end");
+                direction = STOP;
+            }
+            break;
+            default:
+              stop();
+            direction = STOP;
+            break;
+        }
+        
+    }  
+    #endif
+}
