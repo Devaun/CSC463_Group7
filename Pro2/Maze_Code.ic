@@ -1,52 +1,47 @@
 #define TIMEOUT_HALF 1250
 #define TIMEOUT_QUAR 626
+#define LEFT 0
+#define RIGHT 1
+#define FORWARD 2
+#define STOP 3
 
-#define DEBUG
+#define QUARTER 0
+#define HALF 1
+
+#define LEFT_TRN 0
+#define RIGHT_TRN 1
+
+//#define DEBUG
 
 //Remode the rig to hold the handy board
 //Added bumpers
-
-typedef enum
-{
-    LEFT = 0,
-      RIGHT,
-      FORWARD,
-      REVERSE
-  }STATE;
-
-typedef enum
-{
-    QUARTER,
-      HALF
-}TURN;
-
-typedef enum
-{
-    LEFT_TRN,
-    RIGHT_TRN
-}DIRECTION;
 
 //change to bot: added tracks to front tires
 //Lowered the sensor
 //removed the bumper to create more room and remove the shadow
 //added brackets to hold the handyboard
 
+//if cought in a corner the bot has no way currently to get out
+
+//function to control the motor speeds
 void move_motors(int rightSpeed, int leftSpeed)
 {
     motor(0, rightSpeed);
     motor(2, leftSpeed);
 }
 
+//function to check the state of the right sensor
 int check_right_sensor(void)
 {
     //Returns the result of the sensor
-    return digital(5);
+    return digital(8);
 }
 
+//function to check the state of the left sensor
 int check_left_sensor(void)
 {
     //Returns the result of the sensor
-    return digital(5);
+    return digital(15);
 }
 
 //Sets the motors to move right
@@ -54,7 +49,7 @@ void move_right()
 {
     //Move right
     motor(0, 50);
-    motor(2, 50);
+    motor(2, -50);
 }
 
 //Sets the motors to move left
@@ -62,36 +57,38 @@ void move_left()
 {
     //Move left
     motor(0, -50);
-    motor(2, -50);
+    motor(2, 50);
 }
 
 //Turns the robot either 45 or 90 degrees
-void turn(DIRECTION dir, TURN type)
+void turn(int dir, int type)
 {
     //counter variable
     int counter = 0;
     
     if(dir == RIGHT_TRN)
-    {
+      {
         //turns the bot right
         move_right();
     }
     else
-    {
+      {
         //turns the bot right
         move_left();
     }
     
     //check the degree amount
     if(type == HALF)
-      {
+    {
+        //a wait loop for the bot to make a 45 degree turn
         while(counter < TIMEOUT_HALF)
-        {   
+          {   
             counter++;
         }
     }
     else
       {
+        //A wait loop for the bot to make a 90 degree turn
         while(counter < TIMEOUT_QUAR)
           {   
             counter++;
@@ -109,87 +106,95 @@ void stop(void)
     off(2);
 }
 
+//Main
 int main(void)
 {
     //variables
-    STATE direction = FORWARD;
-    STATE rev_next = RIGHT;
+    int direction = FORWARD;
+    int rev_next = LEFT;
     int right_btn, left_btn;
     int passLimit = 0;
-    char overflow = 1;
     
+    //Dont run any of the logic until the start button is pressed
     while(start_button() == 0);
     
+    //Code to debug specific functions of the bot
     #ifdef DEBUG
-      forward(-50, 50);
+      move_motors(50, 50);
     sleep(1.0);
     
     stop();
+    //If DEBUG ndef
     #else
-    //
+    
+    //forever loop
     while(1)
-      {        
+      { 
+        //If the stop button is pressed enter the stop state
+        if(stop_button() == 1)
+          {
+            printf("HERE");
+            direction = STOP;
+        }
+        
+        //switch based off the direction the bot is to be moving
         switch(direction)
-        {
+          {
             case FORWARD:
+              //move forward
+            move_motors(50, 50);
+            
+            //Check the sensors
               right_btn = check_right_sensor();
-              left_btn = check_left_sensor();
+            left_btn = check_left_sensor();
             
-              //
-              while(!right_btn && !left_btn)
-              {
-                  //move forward
-                  move_motors(-50, 50);
-                
-                  right_btn = check_right_sensor();
-                  left_btn = check_left_sensor();
-              }
-            
-              if(right_btn && left_btn)
-              {
-                  direction = REVERSE;
-              }
-              else if(right_btn)
-              {
-                  direction = LEFT;
-              }
-              else
-              {
-                  direction = RIGHT;
-              }
-              break;
+            //If the right button is pressed go to the left state
+            if(right_btn)
+            {
+                direction = LEFT;
+            }
+            //if the left button is pressed to to the right state
+            else if(left_btn)
+            {
+                direction = RIGHT;
+            }
+            break;
             case RIGHT:
-              turn(RIGHT_TRN, QUARTER);
-              direction = FORWARD;
-              break;
-            case LEFT:
-              turn(LEFT_TRN, QUARTER);
-              direction = FORWARD;
-              break;
-            case REVERSE:
-              //reverse
-              move_motors(50, -50);
+              //Back up for a second
+              move_motors(-50, -50);
               sleep(1.0);
-              if(rev_next == RIGHT)
-              {
-                turn(RIGHT_TRN, HALF);
-                direction = FORWARD;
-                rev_next = LEFT;
-              }
-              else
-              {
-                turn(LEFT_TRN, HALF);
-                direction = FORWARD;
-                rev_next = RIGHT;
-              }
             
-              break;
+              //Make a 45 degree right turn
+              turn(RIGHT_TRN, QUARTER);
+            
+              //Next state is forward
+              direction = FORWARD;
+            break;
+            case LEFT:
+              //Back up for a second
+              move_motors(-50, -50);
+              sleep(1.0);
+            
+              //Make a 45 degree left turn
+              turn(LEFT_TRN, QUARTER);
+            
+              //Next state is forward
+              direction = FORWARD;
+            break;
             default:
+              //This is the stop state
               stop();
-              direction = STOP;
+            direction = STOP;
+            
+            //If the start button is pressed restart the code from the beginning
+            if(start_button() == 1)
+              {
+                direction = FORWARD;
+            }
             break;
         }
     }
-    //
-    #endif
+    
+    //End of else
+    #endif //End of ifdef DEBUG
 }
