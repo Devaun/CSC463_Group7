@@ -1,0 +1,195 @@
+#define TIMEOUT_HALF 1250
+#define TIMEOUT_QUAR 626
+
+#define DEBUG
+
+//Remode the rig to hold the handy board
+//Added bumpers
+
+typedef enum
+{
+    LEFT = 0,
+      RIGHT,
+      FORWARD,
+      REVERSE
+  }STATE;
+
+typedef enum
+{
+    QUARTER,
+      HALF
+}TURN;
+
+typedef enum
+{
+    LEFT_TRN,
+    RIGHT_TRN
+}DIRECTION;
+
+//change to bot: added tracks to front tires
+//Lowered the sensor
+//removed the bumper to create more room and remove the shadow
+//added brackets to hold the handyboard
+
+void move_motors(int rightSpeed, int leftSpeed)
+{
+    motor(0, rightSpeed);
+    motor(2, leftSpeed);
+}
+
+int check_right_sensor(void)
+{
+    //Returns the result of the sensor
+    return digital(5);
+}
+
+int check_left_sensor(void)
+{
+    //Returns the result of the sensor
+    return digital(5);
+}
+
+//Sets the motors to move right
+void move_right()
+{
+    //Move right
+    motor(0, 50);
+    motor(2, 50);
+}
+
+//Sets the motors to move left
+void move_left()
+{
+    //Move left
+    motor(0, -50);
+    motor(2, -50);
+}
+
+//Turns the robot either 45 or 90 degrees
+void turn(DIRECTION dir, TURN type)
+{
+    //counter variable
+    int counter = 0;
+    
+    if(dir == RIGHT_TRN)
+    {
+        //turns the bot right
+        move_right();
+    }
+    else
+    {
+        //turns the bot right
+        move_left();
+    }
+    
+    //check the degree amount
+    if(type == HALF)
+      {
+        while(counter < TIMEOUT_HALF)
+        {   
+            counter++;
+        }
+    }
+    else
+      {
+        while(counter < TIMEOUT_QUAR)
+          {   
+            counter++;
+        }
+    }
+    
+    //stop the bot
+    stop();
+}
+
+//Turn off both motors
+void stop(void)
+{
+    off(0);
+    off(2);
+}
+
+int main(void)
+{
+    //variables
+    STATE direction = FORWARD;
+    STATE rev_next = RIGHT;
+    int right_btn, left_btn;
+    int passLimit = 0;
+    char overflow = 1;
+    
+    while(start_button() == 0);
+    
+    #ifdef DEBUG
+      forward(-50, 50);
+    sleep(1.0);
+    
+    stop();
+    #else
+    //
+    while(1)
+      {        
+        switch(direction)
+        {
+            case FORWARD:
+              right_btn = check_right_sensor();
+              left_btn = check_left_sensor();
+            
+              //
+              while(!right_btn && !left_btn)
+              {
+                  //move forward
+                  move_motors(-50, 50);
+                
+                  right_btn = check_right_sensor();
+                  left_btn = check_left_sensor();
+              }
+            
+              if(right_btn && left_btn)
+              {
+                  direction = REVERSE;
+              }
+              else if(right_btn)
+              {
+                  direction = LEFT;
+              }
+              else
+              {
+                  direction = RIGHT;
+              }
+              break;
+            case RIGHT:
+              turn(RIGHT_TRN, QUARTER);
+              direction = FORWARD;
+              break;
+            case LEFT:
+              turn(LEFT_TRN, QUARTER);
+              direction = FORWARD;
+              break;
+            case REVERSE:
+              //reverse
+              move_motors(50, -50);
+              sleep(1.0);
+              if(rev_next == RIGHT)
+              {
+                turn(RIGHT_TRN, HALF);
+                direction = FORWARD;
+                rev_next = LEFT;
+              }
+              else
+              {
+                turn(LEFT_TRN, HALF);
+                direction = FORWARD;
+                rev_next = RIGHT;
+              }
+            
+              break;
+            default:
+              stop();
+              direction = STOP;
+            break;
+        }
+    }
+    //
+    #endif
+}
