@@ -1,20 +1,30 @@
-#define RIGHT 1
-#define LEFT 2
-#define FORWARD 3
-#define STOP 4
-#define TIMEOUT 1250
+#define RIGHT 5
+#define LEFT 6
 
-#define DEBUG
+#define START 1
+#define STOP 2
 
-float Neg_Big;//default 75 / 0
-float Neg_Small;//default 50 / 25
-float Pos_Small;//default 25 / 50
-float Pos_Big;    //default 0 / 75
+//#define DEBUG
 
+//The bot had some issures with real sharp turns
+
+//Left motor / right motor
+int Neg_Big;//default 75 / 25
+int Neg_Small;//default 50 / 25
+int Pos_Small;//default 25 / 50
+int Pos_Big;    //default 25 / 75
+
+//Sets the speeds for the two motors
 void motor_speed(int rightSpeed, int leftSpeed)
 {
     motor(0, rightSpeed);
     motor(2, leftSpeed);
+}
+
+//returns the difference between the two sensors
+int get_sensor_dif(void)
+{
+    return (analog(LEFT) - analog(RIGHT));
 }
 
 //Returns the difference between the two sensors
@@ -23,19 +33,21 @@ void calc_fuzzy(void)
     int dif;
     int temp;
     //Left - Right
-    dif = (analog(6) - analog(5));
+    dif = get_sensor_dif();
     
     if(dif < -100)
       {
         //Neg Big
         temp = ((-1 * dif) - 100);
+        
+        //if we are over certain of a value set it to 100
         if(temp > 100)
           {
-            Neg_Big = 1;
+            Neg_Big = 100;
         }
         else
           {
-            Neg_Big = (temp / 100);
+            Neg_Big = (temp);
         }
         
         Neg_Small = 0;
@@ -47,7 +59,7 @@ void calc_fuzzy(void)
         //Neg_Small
         temp = (-1 * dif);
         
-        Neg_Small = (temp / 100);
+        Neg_Small = (temp);
         
         Neg_Big = 0;
         Pos_Small = 0;
@@ -67,13 +79,14 @@ void calc_fuzzy(void)
         //Pos_Big
         temp = dif - 100;
         
+        //if we are over certain of a value set it to 100
         if(temp > 100)
           {
-            Pos_Big = 1;
+            Pos_Big = 100;
         }
         else
           {
-            Pos_Big = (temp / 100);
+            Pos_Big = (temp);
         }
         
         Neg_Big = 0;
@@ -81,21 +94,6 @@ void calc_fuzzy(void)
         Pos_Small = 0;
     }
 }
-
-void turn_right()
-{
-    //Move right
-    motor(0, 50);
-    motor(2, 50);
-}
-
-void turn_left()
-{
-    //Move left
-    motor(0, -50);
-    motor(2, -50);
-}
-
 
 
 //Turn off both motors
@@ -105,162 +103,88 @@ void stop(void)
     off(2);
 }
 
-int check_right(int passLimit)
+//Calculates and sets the motor speeds for the bot
+void ctrl_bot(void)
 {
-    int counter = 0;
-    int value;
+    int left_speed, right_speed;
+    calc_fuzzy();
     
-    //Move right
-    turn_right();
-    
-    //Check if we found the tape
-    while(counter < TIMEOUT)
+    //Check which state we are in
+    if(Neg_Big != 0)
       {
-        //Check the current sensor value
-        value = check_sensor();
-        
-        //Check if the value is in range
-        if((value > (passLimit - 10)) && (value < (passLimit + 10)))
-          {
-            return 1;
-        }
-        
-        counter++;
+        //Calc. Motor speed for Neg_Big
+        right_speed = (int) (((float) Neg_Big / 100.0) * 75.0)  + 25;
+        left_speed = (int) (((float) Neg_Big / 100.0) * 25.0);
     }
-    
-    //stop turning the bot
-    stop();
-    
-    //If tape no found reset bot position
-    counter = 0;
-    turn_left();
-    
-    //reset the bot's position
-    while(counter < (TIMEOUT + TIMEOUT) + 500)
-      {     
-        counter++;
-    }
-    
-    //return false
-    return 0;
-}
-
-int check_left(int passLimit)
-{
-    int counter = 0;
-    int value;
-    
-    //Move left
-    turn_left();
-    
-    //Check if we found the tape
-    while(counter < TIMEOUT)
+    else if(Neg_Small != 0)
       {
-        //Check the sensor value
-        value = check_sensor();
-        
-        //If the value is in range return true
-        if((value > (passLimit - 10)) && (value < (passLimit + 10)))
-          {
-            return 1;
-        }
-        
-        counter++;
+        //Calc. Motor speed for Neg_Small
+        right_speed = (int) (((float) Neg_Big / 100.0) * 50.0) + 25;
+        left_speed = (int) (((float) Neg_Big / 100.0) * 25.0) + 25;
+    }
+    else if(Pos_Small != 0)
+      {
+        //Calc. Motor speed for Pos_Small
+        right_speed = (int) (((float) Neg_Big / 100.0) * 25.0) + 25;
+        left_speed = (int) (((float) Neg_Big / 100.0) * 50.0) + 25;
+    }
+    else//Pos_Big != 0
+      {
+        //Calc. Motor speed for Pos_Big
+        right_speed = (int)(((float) Pos_Big / 100.0) * 25.0);
+        left_speed = (int) (((float) Pos_Big / 100.0) * 75.0) + 25;
     }
     
-    //stop turning the bot
-    stop();
-    
-    //If tape no found reset bot position
-    counter = 0;
-    turn_right();
-    
-    //Reset the bot's position
-    while(counter < (TIMEOUT + TIMEOUT) + 500)
-      {     
-        counter++;
-    }
-    
-    //we have not found the tape
-    return 0;
+    //Set the motor speed
+    motor_speed(right_speed, left_speed);
 }
 
 int main(void)
 {
     //TODO: Set global values to default
     //variables
-    int direction = FORWARD;
-    int value;
-    int passLimit = 0;
+    int state = START;
     
     while(start_button() == 0);
     
     #ifdef DEBUG
-      printf("Val: %d", analog(5));
+      /* printf("Val: %d", analog(5));
     
     while(stop_button() == 0);
     while(start_button() == 0);
     
     printf("\n\n\n\n\n\n\n\n");
     
-    printf("Val: %d", analog(5));
+    printf("Val: %d", analog(5));*/
+      
+      motor_speed(50, 50);
+    while(stop_button() == 0);
+    stop();
     
     #else
     
-    //Get the average Light sensor value
-    passLimit = passLimit + check_sensor();
-    passLimit = passLimit + check_sensor();
-    passLimit = passLimit + check_sensor();
-    passLimit = passLimit / 3;
-    
     while(1)
-      {        
-        switch(direction)
+      {
+        //switch based on the bot's state
+        switch(state)
           {
-            case FORWARD:
-              value = check_sensor();
             
-            //As long as we have found the tape, move forawrd
-            while((value > (passLimit - 10)) && (value < (passLimit + 10)))
-              {
-                //move forward
-                forward(-50, 50);
-                
-                //Check the new sensor value
-                value = check_sensor();
-            }
+            case START:
+              ctrl_bot();
             
-            //When we lose the tape we will check right
-            direction = RIGHT;
-            break;
-            case RIGHT:
-              //Check if the tape is to the right of the bot
-              if(check_right(passLimit) == 1)
+            //allow the bot to be stopped
+            if(stop_button() == 1)
               {
-                direction = FORWARD;
-            } 
-            else
-              {
-                //check left
-                direction = LEFT;
+                state = STOP;
+                stop(); 
             }
             break;
-            case LEFT:
-              //Check if the tape is to the left of the bot
-              if(check_left(passLimit) == 1)
+            case STOP:
+              //allow the bot to be restarted
+              if(start_button() == 1)
               {
-                direction = FORWARD;
+                state = START;
             }
-            else
-              {
-                //We have lost the tape, just stop
-                printf("Lost or end");
-                direction = STOP;
-            }
-            break;
-            default:
-              stop();
-            direction = STOP;
             break;
         }
     }
