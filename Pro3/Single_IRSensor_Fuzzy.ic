@@ -1,10 +1,13 @@
+//Group 7
+//Devaun G
+//James M
+//Jeff
+
 #define RIGHT 5
 #define LEFT 6
 
 #define START 1
 #define STOP 2
-
-//#define DEBUG
 
 //The bot had some issures with real sharp turns
 
@@ -147,22 +150,6 @@ int main(void)
     
     while(start_button() == 0);
     
-    #ifdef DEBUG
-      /* printf("Val: %d", analog(5));
-    
-    while(stop_button() == 0);
-    while(start_button() == 0);
-    
-    printf("\n\n\n\n\n\n\n\n");
-    
-    printf("Val: %d", analog(5));*/
-      
-      motor_speed(50, 50);
-    while(stop_button() == 0);
-    stop();
-    
-    #else
-    
     while(1)
       {
         //switch based on the bot's state
@@ -188,6 +175,4 @@ int main(void)
             break;
         }
     }
-    
-    #endif
 }
