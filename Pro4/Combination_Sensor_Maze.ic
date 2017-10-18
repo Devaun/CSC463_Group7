@@ -1,0 +1,148 @@
+//Group 7
+//Devaun G
+//James M
+//Jeff
+
+#define FORWARD 1
+#define TURN 2
+
+#define IR_RIGHT 6
+#define IR_LEFT 5
+#define WALL 215  //Get value
+
+#define LIGHT 3
+#define LIGHT_THRESH 210 //get val
+
+#define START 1
+#define STOP 2
+
+
+//#define DEBUG
+
+int movement;
+
+//Sets the speeds for the two motors
+void motor_speed(int rightSpeed, int leftSpeed)
+{
+    motor(0, rightSpeed);
+    motor(2, leftSpeed);
+}
+
+int get_left_IR(void)
+{
+    return analog(IR_LEFT);
+}
+
+int get_right_IR(void)
+{
+    return analog(IR_RIGHT);
+}
+
+int get_light(void)
+{
+    return analog(LIGHT);
+}
+
+//returns the difference between the two sensors
+int get_ir_dif(void)
+{
+    return (get_left_IR() - get_right_IR());
+}
+
+
+//Turn off both motors
+void stop(void)
+{
+    off(0);
+    off(2);
+}
+
+void turning(int default_val)
+{  
+    if(default_val < 0)
+      {
+        motor_speed(50,-50);
+        
+        sleep(2.5);
+    }
+    else
+      {
+        motor_speed(-50,50);
+        sleep(2.5);
+    }
+}
+
+//Calculates and sets the motor speeds for the bot
+void ctrl_bot(void)
+{
+    int light_val;
+    switch (movement)
+      {
+        case FORWARD:
+          motor_speed(60,60);
+        
+        if(get_left_IR() < WALL || get_right_IR() < WALL)
+          {
+            if(get_light() > LIGHT_THRESH)
+              {
+                movement = TURN;
+            }
+            
+        }
+        break;
+        case TURN:
+          turning(get_ir_dif());
+          movement = FORWARD;
+        break;
+    }
+}
+
+int main(void)
+{
+    //variables
+    int state = START;
+    movement = FORWARD;
+    
+    
+    #ifdef DEBUG
+      while(1)
+      {
+        while(start_button() == 0);
+      //motor_speed(50,50);
+    printf("Val_1: %d\n", analog(3));
+    while(stop_button() == 0);
+    
+    printf("Val_2: %d\n", analog(3));
+    }
+    //stop();
+    #else
+    
+    while(start_button() == 0);
+    
+    while(1)
+      {
+        //switch based on the bot's state
+        switch(state)
+          {
+            
+            case START:
+              ctrl_bot();
+            
+            //allow the bot to be stopped
+            if(stop_button() == 1)
+              {
+                state = STOP;
+                stop(); 
+            }
+            break;
+            case STOP:
+              //allow the bot to be restarted
+              if(start_button() == 1)
+              {
+                state = START;
+            }
+            break;
+        }
+    }
+    #endif
+}
