@@ -17,8 +17,8 @@
 #define STOP 2
 
 
-//#define DEBUG
 
+//variable for the bot to remember the movement state
 int movement;
 
 //Sets the speeds for the two motors
@@ -28,16 +28,19 @@ void motor_speed(int rightSpeed, int leftSpeed)
     motor(2, leftSpeed);
 }
 
+//returns the value of the left ir sensor
 int get_left_IR(void)
 {
     return analog(IR_LEFT);
 }
 
+//returns the value of the right ir sensor
 int get_right_IR(void)
 {
     return analog(IR_RIGHT);
 }
 
+//returns the value of the light sensor
 int get_light(void)
 {
     return analog(LIGHT);
@@ -57,17 +60,24 @@ void stop(void)
     off(2);
 }
 
+//allows the bot to make about 90 degree turns
 void turning(int default_val)
 {  
+    //if the parameter is negative turn to the right
     if(default_val < 0)
       {
+        //make a right turn
         motor_speed(50,-50);
         
+        //wait
         sleep(2.5);
     }
     else
       {
+        //make a left turn
         motor_speed(-50,50);
+        
+        //wait
         sleep(2.5);
     }
 }
@@ -75,24 +85,29 @@ void turning(int default_val)
 //Calculates and sets the motor speeds for the bot
 void ctrl_bot(void)
 {
-    int light_val;
+    //switch based on the movement state
     switch (movement)
       {
         case FORWARD:
+          //move forward
           motor_speed(60,60);
         
+        //if one of the Ir sensors see a wall...
         if(get_left_IR() < WALL || get_right_IR() < WALL)
           {
+            //check if the light sensor see a light source
             if(get_light() > LIGHT_THRESH)
               {
+                //if not make the turn
                 movement = TURN;
             }
             
         }
         break;
         case TURN:
+          //turn
           turning(get_ir_dif());
-          movement = FORWARD;
+        movement = FORWARD;
         break;
     }
 }
@@ -103,20 +118,7 @@ int main(void)
     int state = START;
     movement = FORWARD;
     
-    
-    #ifdef DEBUG
-      while(1)
-      {
-        while(start_button() == 0);
-      //motor_speed(50,50);
-    printf("Val_1: %d\n", analog(3));
-    while(stop_button() == 0);
-    
-    printf("Val_2: %d\n", analog(3));
-    }
-    //stop();
-    #else
-    
+    //wait for the start button to be pressed
     while(start_button() == 0);
     
     while(1)
@@ -144,5 +146,4 @@ int main(void)
             break;
         }
     }
-    #endif
 }
