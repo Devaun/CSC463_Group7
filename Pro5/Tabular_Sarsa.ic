@@ -1,0 +1,202 @@
+
+#define START 1
+#define STOP 0
+
+#define FRONT_LEFT 10
+#define FRONT_RIGHT 9
+#define LEFT 15
+#define RIGHT 12
+
+#define FORWARD 0
+#define LEFT_TURN 1
+#define RIGHT_TURN 2
+#define REVERSE 3
+
+int q_vals[4];
+
+int currentAction;
+int nextAction;
+
+int reward(int runNum)
+{
+    int reward = 0;
+    
+    if(digital(FRONT_LEFT) == 1)
+      {
+        reward -= 10;
+    }
+    else
+      {
+        reward += 2;
+    }
+    
+    if(digital(FRONT_RIGHT) == 1)
+      {
+        reward -= 10;
+    }
+    else
+      {
+        reward += 2;
+    }
+    
+    if(digital(LEFT) == 1)
+      {
+        reward -= 2;
+    }
+    else
+      {
+        reward += 1;
+    }
+    
+    if(digital(RIGHT) == 1)
+      {
+        reward -= 2;
+    }
+    else
+      {
+        reward += 1;
+    }
+    
+    //time based punishments
+    switch(currentAction)
+      {
+        case LEFT_TURN:
+          reward -= (4 * (runNum / 100));
+        break;
+        case RIGHT_TURN:
+          reward -= (4 * (runNum / 100));
+        break;
+        case REVERSE:
+          reward -= (8 * (runNum / 100));
+        break;
+        default:
+          break;
+    }
+    
+    return reward;
+}
+
+int getAction()
+{
+    int max = 0;
+    int i = 1;
+    
+    
+    for(; i < 4; i++)
+      {
+        if(q_vals[max] < q_vals[i])
+          {
+            max = i;
+        }
+    }
+    
+    return max;
+}
+
+void move_motors(int rightSpeed, int leftSpeed)
+{
+    motor(0, rightSpeed);
+    motor(2, leftSpeed);
+}
+
+void forwardAction(void)
+{
+    move_motors(50, 50);
+}
+
+void reverseAction(void)
+{
+    move_motors(-50, -50);
+}
+
+void leftAction(void)
+{
+    move_motors(50, -50);
+}
+
+void rightAction(void)
+{
+    move_motors(-50, 50);
+}
+
+void takeAction(void)
+{
+    switch(currentAction)
+      {
+        case FORWARD:
+          forwardAction();
+        break;
+        case REVERSE:
+          reverseAction();
+        break;
+        case LEFT_TURN:
+          leftAction();
+        break;
+        case RIGHT_TURN:
+          rightAction();
+        break;
+    }
+}
+
+//Turn off both motors
+void stop(void)
+{
+    off(0);
+    off(2);
+}
+
+int main(void)
+{
+    int runNum = 0;
+    int i = 0;
+    int state = START;
+    
+    //default the values
+    for(; i < 4; i++)
+      {
+        q_vals[i] = 10;
+    }
+    
+    //Dont run any of the logic until the start button is pressed
+    while(start_button() == 0);
+    
+    currentAction = getAction();
+    
+    while(1)
+      {
+        switch(state)
+          {
+            case START:
+              takeAction();
+            
+            q_vals[currentAction] += reward(runNum);
+            
+            if(q_vals[currentAction] < -100)
+               
+            runNum++;
+            
+            nextAction = getAction();
+            
+            if(nextAction != currentAction)
+              {
+                runNum = 0;
+            }
+            
+            currentAction = nextAction;
+            
+            if(stop_button() == 1)
+              {
+                state = STOP;
+            }
+            break;
+            case STOP:
+              stop();
+            
+            if(start_button() == 1)
+              {
+                state = START;
+            }
+            break;
+        }
+    }
+}
