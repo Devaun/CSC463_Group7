@@ -1,70 +1,91 @@
+//Group 7
+//Devaun G
+//James M
+//Jeff
 
+//defines for the bot states
 #define START 1
 #define STOP 0
 
+//defines for sensor positions
 #define FRONT_LEFT 10
 #define FRONT_RIGHT 9
 #define LEFT 15
 #define RIGHT 12
 
+//defines for tabular sarsa action states
 #define FORWARD 0
 #define LEFT_TURN 1
-#define RIGHT_TURN 2
-#define REVERSE 3
+#define REVERSE 2
+#define RIGHT_TURN 3
 
+//array of action Q-values
 int q_vals[4];
 
+//global variables for current & next action
 int currentAction;
 int nextAction;
 
+//function to caculate the reward/punishment for the bot
 int reward(int runNum)
 {
+    //reward variable
     int reward = 0;
     
-    if(digital(FRONT_LEFT) == 1)
+    if(currentAction != REVERSE)
       {
-        reward -= 10;
+        //If the left front touch sensor is being pressed punish the bot...
+        if(digital(FRONT_LEFT) == 1)
+          {
+            reward -= 10;
+        }
+        else
+          {
+            //reward the bot
+            reward += 2;
+        }
+        
+        //If the right front touch sensor is being pressed punish the bot...
+        if(digital(FRONT_RIGHT) == 1)
+          {
+            reward -= 10;
+        }
+        else
+          {
+            //reward the bot
+            reward += 2;
+        }
+        
+        //If the left touch sensor is being pressed punish the bot...
+        if(digital(LEFT) == 1)
+          {
+            reward -= 2;
+        }
+        else
+          {
+            //reward the bot
+            reward += 1;
+        }
+        
+        //If the right touch sensor is being pressed punish the bot...
+        if(digital(RIGHT) == 1)
+          {
+            reward -= 2;
+        }
+        else
+          {
+            //reward the bot
+            reward += 1;
+        }
     }
-    else
-      {
-        reward += 2;
-    }
-    
-    if(digital(FRONT_RIGHT) == 1)
-      {
-        reward -= 10;
-    }
-    else
-      {
-        reward += 2;
-    }
-    
-    if(digital(LEFT) == 1)
-      {
-        reward -= 2;
-    }
-    else
-      {
-        reward += 1;
-    }
-    
-    if(digital(RIGHT) == 1)
-      {
-        reward -= 2;
-    }
-    else
-      {
-        reward += 1;
-    }
-    
     //time based punishments
     switch(currentAction)
       {
         case LEFT_TURN:
-          reward -= (4 * (runNum / 100));
+          reward -= (16 * (runNum / 100));
         break;
         case RIGHT_TURN:
-          reward -= (4 * (runNum / 100));
+          reward -= (16 * (runNum / 100));
         break;
         case REVERSE:
           reward -= (8 * (runNum / 100));
@@ -73,67 +94,74 @@ int reward(int runNum)
           break;
     }
     
+    //returnt he bots rewards
     return reward;
 }
 
+//function to find out the bots next action
 int getAction()
 {
     int max = 0;
-    int i = 1;
+    int i = 0;
+    int total = 0;
     
-    
-    for(; i < 4; i++)
+    //check if the q_vals have reached the allowed minimum
+    for(i = 0; i < 4; i++)
       {
-        if(q_vals[max] < q_vals[i])
+        total += q_vals[i];
+    }
+    
+    //If the sum of the q_vals is 0 then reset their values
+    if(total == 0)
+      {
+        for(i = 0; i < 4; i++)
           {
-            max = i;
+            q_vals[i] = 200;
+        }
+    }
+    else
+      {
+        //Search all the Q values for the max
+        for(i = 1; i < 4; i++)
+          {
+            if(q_vals[max] < q_vals[i])
+              {
+                max = i;
+            }
         }
     }
     
+    //return the cell index of the max Q-value
     return max;
 }
 
+//function to control the motors
 void move_motors(int rightSpeed, int leftSpeed)
 {
     motor(0, rightSpeed);
     motor(2, leftSpeed);
 }
 
-void forwardAction(void)
-{
-    move_motors(50, 50);
-}
-
-void reverseAction(void)
-{
-    move_motors(-50, -50);
-}
-
-void leftAction(void)
-{
-    move_motors(50, -50);
-}
-
-void rightAction(void)
-{
-    move_motors(-50, 50);
-}
-
+//function call to make the bot take an action
 void takeAction(void)
 {
     switch(currentAction)
       {
         case FORWARD:
-          forwardAction();
+          //Moves the bot forward
+          move_motors(50, 50);
         break;
         case REVERSE:
-          reverseAction();
+          //moves the bot in reverse
+          move_motors(-50, -50);
         break;
         case LEFT_TURN:
-          leftAction();
+          //makes the bot turn to the left
+          move_motors(50, -50);
         break;
         case RIGHT_TURN:
-          rightAction();
+          //makes the bot turn to the right
+          move_motors(-50, 50);
         break;
     }
 }
@@ -147,19 +175,21 @@ void stop(void)
 
 int main(void)
 {
-    int runNum = 0;
-    int i = 0;
-    int state = START;
+    //variables
+    int runNum = 0; //counts how long the bot has been doing the same action
+    int i = 0; //counter for a for loop
+    int state = START; //allows the bot to be stopped and restarted
     
     //default the values
     for(; i < 4; i++)
       {
-        q_vals[i] = 10;
+        q_vals[i] = 200;
     }
     
     //Dont run any of the logic until the start button is pressed
     while(start_button() == 0);
     
+    //get the first action for the bot
     currentAction = getAction();
     
     while(1)
@@ -167,32 +197,43 @@ int main(void)
         switch(state)
           {
             case START:
+              //take an action
               takeAction();
             
+            //Modify the Q-value for that action
             q_vals[currentAction] += reward(runNum);
             
-            if(q_vals[currentAction] < -100)
-               
+            //If a q_val would go negative set it to 0
+            if(q_vals[currentAction] < 0)
+              {
+                q_vals[currentAction] = 0;
+            }
+            
+            //increase the run counter
             runNum++;
             
+            //find the bots next action
             nextAction = getAction();
             
+            //if the next action isnt the current one reset the run counter
             if(nextAction != currentAction)
               {
                 runNum = 0;
             }
             
+            //Set the current action to the enxt action
             currentAction = nextAction;
             
+            //if the stop button is pressed stop the bot
             if(stop_button() == 1)
               {
                 state = STOP;
+                stop();
             }
             break;
             case STOP:
-              stop();
-            
-            if(start_button() == 1)
+              //If the start button is pressed resart the bot
+              if(start_button() == 1)
               {
                 state = START;
             }
