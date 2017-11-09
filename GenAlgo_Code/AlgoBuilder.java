@@ -63,6 +63,48 @@ public class AlgoBuilder extends AbFunctions
 		}
 	}
 	
+	public void swapSingleNode(String loadPath)
+	{
+		AlgoBuilder secondaryTree = new AlgoBuilder();
+		AbFunctions secondaryNode;
+		AbFunctions originalNode;
+		int originalDepth, originalRandomNum;
+		int secondaryDepth, secondaryRandomNum;
+		
+		secondaryTree.loadTree(loadPath);
+		
+		originalDepth = findTreeDepth();
+		secondaryDepth = secondaryTree.findTreeDepth();
+		
+		originalRandomNum = (int)(Math.random() * originalDepth) + 1;
+		originalNode = getTreeNode(originalRandomNum, 1);
+		
+		while(originalNode == null)
+		{
+			originalRandomNum = (int)(Math.random() * originalDepth) + 1;
+			originalNode = getTreeNode(originalRandomNum, 1);
+		}
+		
+		secondaryRandomNum = (int)(Math.random() * secondaryDepth) + 1;
+		secondaryNode = secondaryTree.getTreeNode(secondaryRandomNum, 1);
+		
+		while(secondaryNode == null)
+		{
+			secondaryRandomNum = (int)(Math.random() * secondaryDepth) + 1;
+			secondaryNode = secondaryTree.getTreeNode(secondaryRandomNum, 1);
+		}
+		
+		System.out.printf("\tSwaping Node: %d\n", originalRandomNum);
+		originalNode.testPrint(0);
+		System.out.printf("\tWith: %d\n", secondaryRandomNum);
+		secondaryNode.testPrint(0);
+		
+		if(originalDepth == 1)
+			treeHead = secondaryNode;
+		else
+			originalNode.swap(secondaryNode);		
+	}
+	
 	@Override
 	protected int findDepth(int current)
 	{
@@ -133,5 +175,26 @@ public class AlgoBuilder extends AbFunctions
 				e.printStackTrace();
 			}
 		}
+	}
+
+	
+	@Override
+	/***
+	 * if the next depth is the desired depth return itself
+	 */
+	public AbFunctions getTreeNode(int desiredDepth, int currentDepth)
+	{
+		currentDepth = 0;
+		
+		if((currentDepth + 1) == desiredDepth)
+			return treeHead;
+		else
+			return treeHead.getTreeNode(desiredDepth, currentDepth);
+	}
+
+	@Override
+	protected void swap(AbFunctions node)
+	{
+		//Does nothing
 	}
 }

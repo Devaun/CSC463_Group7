@@ -92,4 +92,19 @@ public class FarFromWall extends AbFunctions
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public AbFunctions getTreeNode(int desiredDepth, int currentDepth)
+	{
+		if((currentDepth + 1) == desiredDepth)
+			return this;
+		else
+			return leftChild.getTreeNode(desiredDepth, currentDepth + 1);
+	}
+
+	@Override
+	protected void swap(AbFunctions node)
+	{
+		leftChild = node;
+	}
 }

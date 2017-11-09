@@ -131,4 +131,30 @@ public class DoTwoCloseFar extends AbFunctions
 			e.printStackTrace();
 		}
 	}
+	
+	@Override
+	public AbFunctions getTreeNode(int desiredDepth, int currentDepth)
+	{
+		AbFunctions temp;
+		if((currentDepth + 1) == desiredDepth)
+			return this;
+		else
+		{
+			temp = leftChild.getTreeNode(desiredDepth, currentDepth + 1);
+			
+			if(temp == null)
+				return rightChild.getTreeNode(desiredDepth, currentDepth + 1);
+			else
+				return temp;
+		}
+	}
+
+	@Override
+	protected void swap(AbFunctions node)
+	{
+		if(((int)Math.random() * 2) == 0)
+			leftChild = node;
+		else
+			rightChild = node;
+	}
 }

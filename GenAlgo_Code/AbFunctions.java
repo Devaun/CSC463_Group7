@@ -105,6 +105,8 @@ public abstract class AbFunctions
 	//public abstract void print();
 	public abstract void testPrint(int num);
 	
+	public abstract AbFunctions getTreeNode(int desiredDepth, int currentDepth);
+	
 	protected abstract int findDepth(int current);
 	
 	protected abstract boolean replaceNode(int maxDepth, int currentDepth, int nodeToReplace);
@@ -112,6 +114,8 @@ public abstract class AbFunctions
 	protected abstract void save(PrintWriter out) throws FileNotFoundException;
 	
 	protected abstract void load(BufferedReader file);
+	
+	protected abstract void swap(AbFunctions node);
 	
 	protected void tabs(int num)
 	{

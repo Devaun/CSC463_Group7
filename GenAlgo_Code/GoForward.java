@@ -48,4 +48,17 @@ public class GoForward extends AbFunctions
 	{
 		//Does Nothing
 	}
+	
+	@Override
+	public AbFunctions getTreeNode(int desiredDepth, int currentDepth)
+	{
+		//Does nothing
+		return null;
+	}
+
+	@Override
+	protected void swap(AbFunctions node)
+	{
+		//Does nothing
+	}
 }
