@@ -3,13 +3,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Scanner;
 import java.util.StringTokenizer;
 
 public class AlgoBuilder extends AbFunctions
 {
 	AbFunctions treeHead;
-	Scanner scan;
 	
 	public AlgoBuilder()
 	{
@@ -36,28 +34,21 @@ public class AlgoBuilder extends AbFunctions
 		replaceNode(0,0,0);
 	}
 	
-	protected boolean replaceNode(int maxDepth, int currentDepth, int nodeToReplace)
+	public void loadTree(String path)
 	{
-		maxDepth = findDepth(0);
-		currentDepth = 0;
-		
-		nodeToReplace = (int)(Math.random() * maxDepth) + 1;
-		
-		System.out.println("Replace: "+ nodeToReplace);
-		
-		if(nodeToReplace == (currentDepth + 1))
-			treeHead = build(0);
-		else
-			treeHead.replaceNode(maxDepth, currentDepth, nodeToReplace);
-		
-		return true;
+		try 
+		{
+			load(new BufferedReader(new FileReader(path)));
+		} catch (FileNotFoundException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-
-	@Override
-	public int findDepth(int current)
+	
+	public int findTreeDepth()
 	{
-		current = 0;
-		return treeHead.findDepth(current);
+		return findDepth(0);
 	}
 
 	public void saveTree(String path)
@@ -73,6 +64,29 @@ public class AlgoBuilder extends AbFunctions
 	}
 	
 	@Override
+	protected int findDepth(int current)
+	{
+		current = 0;
+		return treeHead.findDepth(current);
+	}
+	
+	protected boolean replaceNode(int maxDepth, int currentDepth, int nodeToReplace)
+	{
+		maxDepth = findDepth(0);
+		currentDepth = 0;
+		nodeToReplace = (int)(Math.random() * maxDepth) + 1;
+		
+		System.out.println("Replace: "+ nodeToReplace);
+		
+		if(nodeToReplace == (currentDepth + 1))
+			treeHead = build(0);
+		else
+			treeHead.replaceNode(maxDepth, currentDepth, nodeToReplace);
+		
+		return true;
+	}
+	
+	@Override
 	protected void save(PrintWriter out) throws FileNotFoundException
 	{
 		out = new PrintWriter("TreeSaving.txt");
@@ -80,18 +94,6 @@ public class AlgoBuilder extends AbFunctions
 		treeHead.save(out);
 		
 		out.close();
-	}
-
-	public void loadTree(String path)
-	{
-		try 
-		{
-			load(new BufferedReader(new FileReader(path)));
-		} catch (FileNotFoundException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	@Override
