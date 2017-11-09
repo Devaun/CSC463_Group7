@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.StringTokenizer;
 
 public class CloseToWall extends AbFunctions
 {
@@ -14,6 +16,14 @@ public class CloseToWall extends AbFunctions
 		
 		leftChild = build(depth + 1);
 		rightChild = null;
+	}
+	
+	public CloseToWall(int sensorOne, int sensorTwo)
+	{
+		numSensors = 1;
+		sensorNums = new int[numSensors];	
+		
+		sensorNums[0] = sensorOne;
 	}
 
 	@Override
@@ -51,6 +61,36 @@ public class CloseToWall extends AbFunctions
 	@Override
 	protected void save(PrintWriter out) throws FileNotFoundException
 	{
-		out.printf("%d, %d, %d", 0, sensorNums[0], -1);		
+		out.printf("%d, %d, %d\n", 0, sensorNums[0], -1);
+		
+		leftChild.save(out);
+	}
+
+	@Override
+	protected void load(BufferedReader file) 
+	{
+		int fun[] = new int[3];
+		StringTokenizer s;
+		String line;
+		
+		try 
+		{
+			if( (line = file.readLine()) != null)
+			{			
+				s = new StringTokenizer(line);
+				
+				fun[0] = Integer.parseInt(s.nextToken(",").trim());
+				fun[1] = Integer.parseInt(s.nextToken(",").trim());
+				fun[2] = Integer.parseInt(s.nextToken(",").trim());
+				
+				leftChild = LoadHelper(fun[0], fun[1], fun[2]);
+				
+				leftChild.load(file);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

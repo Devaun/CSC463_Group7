@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.StringTokenizer;
 
 public class DoTwoCloseClose extends AbFunctions
 {
@@ -16,6 +18,15 @@ public class DoTwoCloseClose extends AbFunctions
 		
 		leftChild = build(depth + 1);
 		rightChild = build(depth + 1);
+	}
+	
+	public DoTwoCloseClose(int sensorOne, int sensorTwo)
+	{
+		numSensors = 2;
+		sensorNums = new int[numSensors];	
+		
+		sensorNums[0] = sensorOne;
+		sensorNums[1] = sensorTwo;
 	}
 
 	@Override
@@ -74,6 +85,50 @@ public class DoTwoCloseClose extends AbFunctions
 	@Override
 	protected void save(PrintWriter out) throws FileNotFoundException
 	{
-		out.printf("%d, %d, %d", 3, sensorNums[0], sensorNums[1]);		
+		out.printf("%d, %d, %d\n", 3, sensorNums[0], sensorNums[1]);
+		
+		leftChild.save(out);
+		rightChild.save(out);
+	}
+	
+	@Override
+	protected void load(BufferedReader file) 
+	{
+		int fun[] = new int[3];
+		StringTokenizer s;
+		String line;
+		
+		try 
+		{
+			if( (line = file.readLine()) != null)
+			{			
+				s = new StringTokenizer(line);
+				
+				fun[0] = Integer.parseInt(s.nextToken(",").trim());
+				fun[1] = Integer.parseInt(s.nextToken(",").trim());
+				fun[2] = Integer.parseInt(s.nextToken(",").trim());
+				
+				leftChild = LoadHelper(fun[0], fun[1], fun[2]);
+				
+				leftChild.load(file);
+			}
+			
+			if( (line = file.readLine()) != null)
+			{			
+				s = new StringTokenizer(line);
+				
+				fun[0] = Integer.parseInt(s.nextToken(",").trim());
+				fun[1] = Integer.parseInt(s.nextToken(",").trim());
+				fun[2] = Integer.parseInt(s.nextToken(",").trim());
+				
+				rightChild = LoadHelper(fun[0], fun[1], fun[2]);
+				
+				rightChild.load(file);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 public class GoForward extends AbFunctions
 {	
 	public GoForward()
@@ -31,5 +35,17 @@ public class GoForward extends AbFunctions
 	{
 		//System.err.println("GOFORWARD: WE SHOULDNT GET HERE");
 		return false;	
+	}
+	
+	@Override
+	protected void save(PrintWriter out) throws FileNotFoundException
+	{
+		out.printf("%d, %d, %d\n", 6, -1, -1);		
+	}
+	
+	@Override
+	protected void load(BufferedReader file) 
+	{
+		//Does Nothing
 	}
 }

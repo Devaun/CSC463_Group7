@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 
 public class TurnParallelToPosition extends AbFunctions
 {
@@ -32,5 +35,17 @@ public class TurnParallelToPosition extends AbFunctions
 	{
 		//System.err.println("PARALLEL: WE SHOULDNT GET HERE");
 		return false;	
+	}
+	
+	@Override
+	protected void save(PrintWriter out) throws FileNotFoundException
+	{
+		out.printf("%d, %d, %d\n", 10, -1, -1);		
+	}
+	
+	@Override
+	protected void load(BufferedReader file) 
+	{
+		//Does Nothing
 	}
 }

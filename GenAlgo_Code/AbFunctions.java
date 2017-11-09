@@ -1,3 +1,4 @@
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
@@ -68,6 +69,39 @@ public abstract class AbFunctions
 		return null;
 	}
 	
+	protected AbFunctions LoadHelper(int function, int sensorOne, int sensorTwo)
+	{
+		switch(function)
+		{
+			case 0:
+				return (new CloseToWall(sensorOne, sensorTwo));
+			case 1:
+				return (new FarFromWall(sensorOne, sensorTwo));
+			case 2:
+				return (new DoTwoFarFar(sensorOne, sensorTwo));
+			case 3:
+				return (new DoTwoCloseClose(sensorOne, sensorTwo));
+			case 4:
+				return (new DoTwoFarClose(sensorOne, sensorTwo));
+			case 5:
+				return (new DoTwoCloseFar(sensorOne, sensorTwo));
+			case 6:
+				return (new GoForward());
+			case 7:
+				return (new TurnRight());
+			case 8:
+				return (new TurnLeft());
+			case 9:
+				return (new Backup());
+			case 10:
+				return (new TurnParallelToPosition());
+			case 11:
+				return (new TurnSquareWithWall());
+			default:
+				return null;
+		}
+	}
+	
 	//public abstract void print();
 	public abstract void testPrint(int num);
 	
@@ -75,8 +109,9 @@ public abstract class AbFunctions
 	
 	protected abstract boolean replaceNode(int maxDepth, int currentDepth, int nodeToReplace);
 	
-	
 	protected abstract void save(PrintWriter out) throws FileNotFoundException;
+	
+	protected abstract void load(BufferedReader file);
 	
 	protected void tabs(int num)
 	{
