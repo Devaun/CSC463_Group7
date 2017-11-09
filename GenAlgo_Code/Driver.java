@@ -5,23 +5,21 @@ public class Driver
 		AlgoBuilder j = new AlgoBuilder();
 		AlgoBuilder loadTest = new AlgoBuilder();
 		
+		System.out.println("TREE 1:");
 		j.buildTree();
-		
-		System.out.println("ORIGINAL TREE");
 		j.testPrint(0);
+		j.saveTree("TreeSaving.txt");
 		System.out.println("Max Depth: " + j.findTreeDepth());
 		
-		System.out.println("\nLOADING:");
 		
-		loadTest.loadTree("TreeSaving.txt");
-		loadTest.testPrint(0);
-		System.out.println("Max Depth: " + loadTest.findTreeDepth());
+		j.buildTree();
+		System.out.println("\nTREE 2:");
+		j.testPrint(0);
 		
-		System.out.println("\nSwapping a single node:");
-		
+		System.out.println("\nSWAPPING:");
 		j.swapSingleNode("TreeSaving.txt");
 		
-		System.out.println("\nNEW TREE");
+		System.out.println("\nNEW TREE:");
 		
 		j.testPrint(0);
 	}

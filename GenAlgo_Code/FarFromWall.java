@@ -29,7 +29,7 @@ public class FarFromWall extends AbFunctions
 	@Override
 	public void testPrint(int num)
 	{
-		tabs(num);
+		testTabs(num);
 		System.out.println("Far From Wall");
 		
 		if(leftChild != null)
@@ -106,5 +106,18 @@ public class FarFromWall extends AbFunctions
 	protected void swap(AbFunctions node)
 	{
 		leftChild = node;
+	}
+	
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		tabs(depth);
+		System.out.printf("while(analog(%s) > THRESHOLD)\n", getSensorName(sensorNums[0]));
+		tabs(depth);
+		System.out.printf("{\n");
+		tabs(depth + 1);
+		leftChild.print(depth + 1, motorRight, motorLeft);
+		tabs(depth);
+		System.out.printf("}\n");
 	}
 }

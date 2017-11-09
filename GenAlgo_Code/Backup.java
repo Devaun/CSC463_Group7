@@ -15,7 +15,7 @@ public class Backup extends AbFunctions
 	@Override
 	public void testPrint(int num)
 	{
-		tabs(num);
+		testTabs(num);
 		System.out.println("Backup");
 		
 		if(leftChild != null)
@@ -59,5 +59,12 @@ public class Backup extends AbFunctions
 	protected void swap(AbFunctions node)
 	{
 		//Does nothing
+	}
+
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		tabs(depth);
+		System.out.printf("moveMotors(-%d, -%d);\n", motorRight, motorLeft);
 	}
 }

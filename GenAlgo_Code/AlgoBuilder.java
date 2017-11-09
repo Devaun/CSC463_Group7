@@ -23,7 +23,7 @@ public class AlgoBuilder extends AbFunctions
 	public void testPrint(int num)
 	{
 		num = 0;
-		tabs(0);
+		testTabs(0);
 		System.out.println("Main");
 		
 		treeHead.testPrint(num + 1);
@@ -178,10 +178,10 @@ public class AlgoBuilder extends AbFunctions
 	}
 
 	
-	@Override
 	/***
-	 * if the next depth is the desired depth return itself
+	 * If the next depth is the desired depth return itself
 	 */
+	@Override
 	public AbFunctions getTreeNode(int desiredDepth, int currentDepth)
 	{
 		currentDepth = 0;
@@ -189,12 +189,69 @@ public class AlgoBuilder extends AbFunctions
 		if((currentDepth + 1) == desiredDepth)
 			return treeHead;
 		else
-			return treeHead.getTreeNode(desiredDepth, currentDepth);
+			return treeHead.getTreeNode(desiredDepth, currentDepth + 1);
 	}
 
 	@Override
 	protected void swap(AbFunctions node)
 	{
 		//Does nothing
+	}
+	
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		depth = 0;
+		System.out.println("//TODO Set the define values");
+		System.out.println("#define THRESHOLD   \n");
+		System.out.println("#define LEFT_SEN    //Sensor position\n");
+		System.out.println("#define RIGHT_SEN   //Sensor position\n");
+		System.out.println("#define FRONT_LEFT  //Sensor position\n");
+		System.out.println("#define FRONT_RIGHT //Sensor position\n");
+		System.out.println("void move_motors(int rightSpeed, int leftSpeed)\r\n" + 
+				"{\r\n" + 
+				"     motor(0, rightSpeed);\r\n" + 
+				"     motor(2, leftSpeed);\r\n" + 
+				"}");
+		
+		System.out.println("\nvoid turnLeftNine(void)\r\n" + 
+				"{\r\n" + 
+				"     //TODO: Design the code to make the bot turn 90 degrees\r\n" + 
+				"}");
+		
+		System.out.println("\nvoid squareUp(void)\r\n" + 
+				"{\r\n" + 
+				"     int range = 5;\r\n" + 
+				"     int value;\r\n" +
+				"     int dir;" +
+				"     if(analog(FRONT_LEFT) > analog(FRONT_RIGHT)\r\n" +
+				"     {\r\n" +
+				"          dir = 1; //Turn to the right\r\n" +
+				"     }\r\n" +
+				"     else\r\n" +
+				"     {\r\n" + 
+				"          dir = 0; //Turn to the left\r\n" +
+				"     }\r\n" +
+				"\r\n" + 
+				"     switch(dir)\r\n" + 
+				"     {\r\n" +
+				"          case 0:" +
+				"               value = analog(FRONT_LEFT);\r\n" + 
+				"               move_motors(" +  motorRight + ", " + (-1 * motorLeft) + ");\r\n" + 
+				"               while(analog(FRONT_RIGHT) >= (value + range));\r\n" +
+				"               break;" + 
+				"          case 1:" +
+				"               value = analog(FRONT_RIGHT);\r\n" + 
+				"               move_motors(" +  (-1 * motorRight) + ", " + motorLeft + ");\r\n" + 
+				"               while(analog(FRONT_LEFT) >= (value + range));\r\n" +
+				"               break;" + 
+				"     }\r\n" +
+				"}");
+		
+		System.out.println("int main(void)");
+		System.out.println("{");
+		treeHead.print(depth + 1, motorRight, motorLeft);
+		System.out.println("}");
+		
 	}
 }

@@ -15,7 +15,7 @@ public class TurnParallelToPosition extends AbFunctions
 	@Override
 	public void testPrint(int num)
 	{
-		tabs(num);
+		testTabs(num);
 		System.out.println("Turn Parallel To Position");
 		
 		if(leftChild != null)
@@ -60,5 +60,21 @@ public class TurnParallelToPosition extends AbFunctions
 	protected void swap(AbFunctions node)
 	{
 		//Does nothing
+	}
+
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		tabs(depth);
+		System.out.printf("moveMotors(-%d, -%d);\n", motorRight, motorLeft);
+		
+		tabs(depth);
+		System.out.printf("sleep(%g);\n;", 1.0);
+		
+		tabs(depth);
+		System.out.printf("moveMotors(%d, -%d);\n", motorRight, motorLeft);
+		
+		tabs(depth);
+		System.out.printf("turnLeftNine();\n");
 	}
 }

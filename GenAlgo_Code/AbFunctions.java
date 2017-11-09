@@ -102,7 +102,8 @@ public abstract class AbFunctions
 		}
 	}
 	
-	//public abstract void print();
+	protected abstract void print(int depth, int motorRight, int motorLeft);
+	
 	public abstract void testPrint(int num);
 	
 	public abstract AbFunctions getTreeNode(int desiredDepth, int currentDepth);
@@ -117,9 +118,42 @@ public abstract class AbFunctions
 	
 	protected abstract void swap(AbFunctions node);
 	
-	protected void tabs(int num)
+	protected String getSensorName(int sensorVal)
+	{
+		switch(sensorVal)
+		{
+		case 0:
+			return "LEFT_SEN";
+		case 1:
+			return "RIGHT_SEN";
+		case 2:
+			return "FRONT_LEFT";
+		case 3:
+			return "FRONT_RIGHT";
+		default:
+			return "";
+		}
+	}
+	
+	/**
+	 * Places tabs and a label into the text output
+	 * @param num
+	 */
+	protected void testTabs(int num)
 	{
 		System.out.print("Depth: " + num + " ");
+		for(int i = 0; i < num; i++)
+		{
+			System.out.print("   ");
+		}
+	}
+	
+	/**
+	 * Places tabs into the text output
+	 * @param num
+	 */
+	protected void tabs(int num)
+	{
 		for(int i = 0; i < num; i++)
 		{
 			System.out.print("   ");

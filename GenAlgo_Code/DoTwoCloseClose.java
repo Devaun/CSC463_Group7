@@ -32,7 +32,7 @@ public class DoTwoCloseClose extends AbFunctions
 	@Override
 	public void testPrint(int num)
 	{
-		tabs(num);
+		testTabs(num);
 		System.out.println("Do Two Close Close");
 		
 		if(leftChild != null)
@@ -156,5 +156,25 @@ public class DoTwoCloseClose extends AbFunctions
 			leftChild = node;
 		else
 			rightChild = node;
+	}
+	
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		tabs(depth);
+		System.out.printf("while(analog(%s) < THRESHOLD)\n", getSensorName(sensorNums[0]));
+		tabs(depth);
+		System.out.printf("{\n");
+		leftChild.print(depth + 1, motorRight, motorLeft);
+		tabs(depth);
+		System.out.printf("}\n");
+		
+		tabs(depth);
+		System.out.printf("while(analog(%s) < THRESHOLD)\n", getSensorName(sensorNums[1]));
+		tabs(depth);
+		System.out.printf("{\n");
+		rightChild.print(depth + 1, motorRight, motorLeft);
+		tabs(depth);
+		System.out.printf("}\n");
 	}
 }

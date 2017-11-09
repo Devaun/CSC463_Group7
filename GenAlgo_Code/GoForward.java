@@ -15,7 +15,7 @@ public class GoForward extends AbFunctions
 	@Override
 	public void testPrint(int num)
 	{
-		tabs(num);
+		testTabs(num);
 		System.out.println("Go Forward");
 		
 		if(leftChild != null)
@@ -60,5 +60,12 @@ public class GoForward extends AbFunctions
 	protected void swap(AbFunctions node)
 	{
 		//Does nothing
+	}
+	
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		tabs(depth);
+		System.out.printf("moveMotors(%d, %d)\n;", motorRight, motorLeft);
 	}
 }

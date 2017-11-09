@@ -15,7 +15,7 @@ public class TurnSquareWithWall extends AbFunctions
 	@Override
 	public void testPrint(int num)
 	{
-		tabs(num);
+		testTabs(num);
 		System.out.println("Turn Square with wall");
 		
 		if(leftChild != null)
@@ -60,5 +60,12 @@ public class TurnSquareWithWall extends AbFunctions
 	protected void swap(AbFunctions node)
 	{
 		//Does nothing
+	}
+
+	@Override
+	protected void print(int depth, int motorRight, int motorLeft)
+	{
+		tabs(depth);
+		System.out.printf("squareUp();\n");
 	}
 }
