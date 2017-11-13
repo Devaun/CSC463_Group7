@@ -117,18 +117,18 @@ public class TurnParallelToPosition extends AbFunctions
 	 * @param motorLeft The left motor value
 	 */
 	@Override
-	protected void print(int depth, int motorRight, int motorLeft)
+	protected void print(PrintWriter out, int depth, int motorRight, int motorLeft)
 	{
-		tabs(depth);
-		System.out.printf("moveMotors(-%d, -%d);\n", motorRight, motorLeft);
+		tabs(out, depth);
+		out.printf("moveMotors(-%d, -%d);\n", motorRight, motorLeft);
 		
-		tabs(depth);
-		System.out.printf("sleep(%g);\n", 1.0);
+		tabs(out, depth);
+		out.printf("sleep(%g);\n", 1.0);
 		
-		tabs(depth);
-		System.out.printf("moveMotors(%d, -%d);\n", motorRight, motorLeft);
+		tabs(out, depth);
+		out.printf("moveMotors(%d, -%d);\n", motorRight, motorLeft);
 		
-		tabs(depth);
-		System.out.printf("turnLeftNine();\n");
+		tabs(out, depth);
+		out.printf("turnLeftNine();\n");
 	}
 }

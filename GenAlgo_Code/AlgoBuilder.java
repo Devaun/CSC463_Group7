@@ -37,9 +37,17 @@ public class AlgoBuilder extends AbFunctions
 	 * @param motorRight The right motor speed
 	 * @param motorLeft The left motor speed
 	 */
-	public void fullPrint(int motorRight, int motorLeft)
+	public void fullPrint(String path, int motorRight, int motorLeft)
 	{
-		print(0, motorRight, motorLeft);
+		try 
+		{
+			print(new PrintWriter(path), 0, motorRight, motorLeft);
+		} catch (FileNotFoundException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	
@@ -311,38 +319,38 @@ public class AlgoBuilder extends AbFunctions
 	 * @param motorLeft The left motor value
 	 */
 	@Override
-	protected void print(int depth, int motorRight, int motorLeft)
+	protected void print(PrintWriter out, int depth, int motorRight, int motorLeft)
 	{
 		depth = 0;
 		
 		//prints out the #defines used in the program
-		System.out.println("//TODO Set the define values");
-		System.out.println("#define THRESHOLD   ");
-		System.out.println("#define LEFT_SEN    //Sensor position");
-		System.out.println("#define RIGHT_SEN   //Sensor position");
-		System.out.println("#define FRONT_LEFT  //Sensor position");
-		System.out.println("#define FRONT_RIGHT //Sensor position");
+		out.println("//TODO Set the define values");
+		out.println("#define THRESHOLD   ");
+		out.println("#define LEFT_SEN    //Sensor position");
+		out.println("#define RIGHT_SEN   //Sensor position");
+		out.println("#define FRONT_LEFT  //Sensor position");
+		out.println("#define FRONT_RIGHT //Sensor position");
 		
 		//Prints out a function to control the bots motors
-		System.out.println("\nvoid move_motors(int rightSpeed, int leftSpeed)\r\n" + 
+		out.println("\nvoid moveMotors(int rightSpeed, int leftSpeed)\r\n" + 
 				"{\r\n" + 
 				"     motor(0, rightSpeed);\r\n" + 
 				"     motor(2, leftSpeed);\r\n" + 
 				"}");
 		
 		//Print out the function called to have the bot turn 90 degrees
-		System.out.println("\nvoid turnLeftNine(void)\r\n" + 
+		out.println("\nvoid turnLeftNine(void)\r\n" + 
 				"{\r\n" + 
 				"     //TODO: Design the code to make the bot turn 90 degrees\r\n" + 
 				"}");
 		
 		//Print out the function used to square up the bot
-		System.out.println("\nvoid squareUp(void)\r\n" + 
+		out.println("\nvoid squareUp(void)\r\n" + 
 				"{\r\n" + 
 				"     int range = 5;\r\n" + 
 				"     int value;\r\n" +
 				"     int dir;\r\n" +
-				"     if(analog(FRONT_LEFT) > analog(FRONT_RIGHT)\r\n" +
+				"     if(analog(FRONT_LEFT) > analog(FRONT_RIGHT))\r\n" +
 				"     {\r\n" +
 				"          dir = 1; //Turn to the right\r\n" +
 				"     }\r\n" +
@@ -355,24 +363,26 @@ public class AlgoBuilder extends AbFunctions
 				"     {\r\n" +
 				"          case 0:\r\n" +
 				"               value = analog(FRONT_LEFT);\r\n" + 
-				"               move_motors(" +  motorRight + ", " + (-1 * motorLeft) + ");\r\n" + 
+				"               moveMotors(" +  motorRight + ", " + (-1 * motorLeft) + ");\r\n" + 
 				"               while(analog(FRONT_RIGHT) >= (value + range));\r\n" +
 				"               break;\r\n" + 
 				"          case 1:\r\n" +
 				"               value = analog(FRONT_RIGHT);\r\n" + 
-				"               move_motors(" +  (-1 * motorRight) + ", " + motorLeft + ");\r\n" + 
+				"               moveMotors(" +  (-1 * motorRight) + ", " + motorLeft + ");\r\n" + 
 				"               while(analog(FRONT_LEFT) >= (value + range));\r\n" +
 				"               break;\r\n" + 
 				"     }\r\n" +
 				"}\r\n");
 		
 		//print out main
-		System.out.println("int main(void)");
-		System.out.println("{");
+		out.println("int main(void)");
+		out.println("{");
 		
 		//start the call to print the tree
-		treeHead.print(depth + 1, motorRight, motorLeft);
+		treeHead.print(out, depth + 1, motorRight, motorLeft);
 		
-		System.out.println("}");
+		out.println("}");
+		
+		out.close();
 	}
 }

@@ -81,7 +81,7 @@ public abstract class AbFunctions
 	 * @param motorRight The rightMotor value
 	 * @param motorLeft The left motor value
 	 */
-	protected abstract void print(int depth, int motorRight, int motorLeft);
+	protected abstract void print(PrintWriter out, int depth, int motorRight, int motorLeft);
 	
 	
 	/**
@@ -223,11 +223,11 @@ public abstract class AbFunctions
 	 * Places tabs into the text output
 	 * @param num the number of times 5 spaces should be printed
 	 */
-	protected void tabs(int num)
+	protected void tabs(PrintWriter out, int num)
 	{
 		for(int i = 0; i < num; i++)
 		{
-			System.out.print("   ");
+			out.print("   ");
 		}
 	}
 }

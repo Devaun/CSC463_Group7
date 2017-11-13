@@ -243,24 +243,24 @@ public class DoTwoCloseClose extends AbFunctions
 	 * @param motorLeft The left motor value
 	 */
 	@Override
-	protected void print(int depth, int motorRight, int motorLeft)
+	protected void print(PrintWriter out, int depth, int motorRight, int motorLeft)
 	{
 		//Prints the code for the left child
-		tabs(depth);
-		System.out.printf("while(analog(%s) < THRESHOLD)\n", getSensorName(sensorNums[0]));
-		tabs(depth);
-		System.out.printf("{\n");
-		leftChild.print(depth + 1, motorRight, motorLeft);
-		tabs(depth);
-		System.out.printf("}\n");
+		tabs(out, depth);
+		out.printf("while(analog(%s) < THRESHOLD)\n", getSensorName(sensorNums[0]));
+		tabs(out, depth);
+		out.printf("{\n");
+		leftChild.print(out, depth + 1, motorRight, motorLeft);
+		tabs(out, depth);
+		out.printf("}\n");
 		
 		//prints the code for the right child
-		tabs(depth);
-		System.out.printf("while(analog(%s) < THRESHOLD)\n", getSensorName(sensorNums[1]));
-		tabs(depth);
-		System.out.printf("{\n");
-		rightChild.print(depth + 1, motorRight, motorLeft);
-		tabs(depth);
-		System.out.printf("}\n");
+		tabs(out, depth);
+		out.printf("while(analog(%s) < THRESHOLD)\n", getSensorName(sensorNums[1]));
+		tabs(out, depth);
+		out.printf("{\n");
+		rightChild.print(out, depth + 1, motorRight, motorLeft);
+		tabs(out, depth);
+		out.printf("}\n");
 	}
 }

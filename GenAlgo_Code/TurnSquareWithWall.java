@@ -117,9 +117,9 @@ public class TurnSquareWithWall extends AbFunctions
 	 * @param motorLeft The left motor value
 	 */
 	@Override
-	protected void print(int depth, int motorRight, int motorLeft)
+	protected void print(PrintWriter out, int depth, int motorRight, int motorLeft)
 	{
-		tabs(depth);
-		System.out.printf("squareUp();\n");
+		tabs(out, depth);
+		out.printf("squareUp();\n");
 	}
 }
