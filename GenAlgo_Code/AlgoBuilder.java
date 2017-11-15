@@ -377,10 +377,17 @@ public class AlgoBuilder extends AbFunctions
 		//print out main
 		out.println("int main(void)");
 		out.println("{");
-		
+		tabs(out, 1);
+		out.println("printf(\"Clear\\nClear\\n\");");
+		tabs(out, 1);
+		out.println("while(start_button() == 0);");
+		tabs(out, 1);
+		out.println("printf(\"Start\\n\");");
 		//start the call to print the tree
 		treeHead.print(out, depth + 1, motorRight, motorLeft);
 		
+		tabs(out, 1);
+		out.println("printf(\"End\\n\");");
 		out.println("}");
 		
 		out.close();

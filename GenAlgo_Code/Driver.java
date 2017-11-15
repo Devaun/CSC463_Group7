@@ -12,7 +12,6 @@ public class Driver
 		int runNum = 1;
 		
 		tree.buildTree();
-		tree.saveTree("TreeSaving.txt");
 		
 		while(cont)
 		{
