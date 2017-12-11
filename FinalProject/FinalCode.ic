@@ -1,9 +1,9 @@
 //#define DEBUG
 
-#define MOTOR_SPEED 80
+#define MOTOR_SPEED 100
 #define LEFT 1
 #define RIGHT 2
-#define TIMEOUT 1250
+#define TIMEOUT 1850
 
 #define FORWARD 1
 #define INTERSECTION 2
@@ -17,10 +17,12 @@
 #define LIGHT_SENSOR 3
 #define LIGHT_THRESHOLD 500 //TODO - Set value
 
+//array used to keep track of "cells" checked
+//If using an always turn ____ algo. this array isnt needed
 int checked_array[10];
 
-int prev_inter_num;
-int inter_num;
+int prev_inter_num; //variable that keeps track of the previous intersection number. Allows us to track direciton
+int inter_num;  //Variable to keep track of the intersection number
 
 //function to control the motor speeds
 void move_motors(int leftSpeed, int rightSpeed)
@@ -36,11 +38,13 @@ void stop(void)
     off(2);
 }
 
+//returns the value of the analog sensor
 int check_sensor(int value)
 {
     return analog(value);
 }
 
+//closes the claw for the bot
 void close_claw(void)
 {
     motor(4, 20);
@@ -48,6 +52,7 @@ void close_claw(void)
     motor(4, 0);
 }
 
+//opens the claw for the bot
 void open_claw(void)
 {
     motor(4, -20);
@@ -55,44 +60,50 @@ void open_claw(void)
     motor(4, 0);
 }
 
+//check if the bot is at an intersection
 int at_intersection(int left_val, int right_val)
 {
     int ret_val = 0;
     int right_sen = check_sensor(RIGHT_INTER_SENSOR);
     int left_sen = check_sensor(LEFT_INTER_SENSOR);
     
+    //If the right or left sensor arent close to the over the board value we have found an interesction
     if( !((right_sen > (right_val - 10)) && (right_sen < (right_val + 10))) )
-    {
+      {
         ret_val = 1;
     }
     else if( !((left_sen > (left_val - 10)) && (left_sen < (left_val + 10))) )
-    {
+      {
         ret_val = 1;        
     }
     
     return ret_val;
 }
 
+//The bot will turn 
 void turn_bot(int passLimit, int direction)
 {
     int value;
     int left_motor = MOTOR_SPEED;
     int right_motor = MOTOR_SPEED;
     
+    //change the motor values based on the direction the bot is to turn
     if(direction == LEFT)
       {
-       left_motor *= -1; 
+        left_motor *= -1; 
     }
     else
       {
         right_motor *= -1;
     }
     
+    //turn the bot
     move_motors(left_motor, right_motor);
     
     //Check the current sensor value
     value = check_sensor(LINE_SENSOR);
     
+    //while the line sensor is over the tape turn
     while(((value > (passLimit - 10)) && (value < (passLimit + 10))))
       {
         move_motors(left_motor, right_motor); 
@@ -100,12 +111,13 @@ void turn_bot(int passLimit, int direction)
         value = check_sensor(LINE_SENSOR);
     }
     
+    //turn the bot a little past the line
     sleep(0.3);
-    //stop();
     
     //Check the current sensor value
     value = check_sensor(LINE_SENSOR);
     
+    //While the line sensor isnt over the tape turn
     while( !((value > (passLimit - 10)) && (value < (passLimit + 10))))
       {
         move_motors(left_motor, right_motor);  
@@ -114,6 +126,48 @@ void turn_bot(int passLimit, int direction)
     }
 }
 
+//have the bot preform a 180 turn
+void rotate_oneeightzero(int passLimit, int direction)
+{
+    
+    int value;
+    int left_motor = MOTOR_SPEED;
+    int right_motor = MOTOR_SPEED;
+    
+    //change the motor values based on the direction the bot is to turn
+    if(direction == LEFT)
+      {
+        left_motor *= -1; 
+    }
+    else
+      {
+        right_motor *= -1;
+    }
+    
+    turn_bot(passLimit, direction);
+    
+    //turn the bot
+    move_motors(left_motor, right_motor);
+    
+    //Check the current sensor value
+    value = check_sensor(LINE_SENSOR);
+    
+    //while the line sensor is over the tape turn
+    while(((value > (passLimit - 10)) && (value < (passLimit + 10))))
+      {
+        move_motors(left_motor, right_motor); 
+        
+        value = check_sensor(LINE_SENSOR);
+    }
+    
+    move_motors(MOTOR_SPEED, MOTOR_SPEED);
+    sleep(0.3);
+    
+    turn_bot(passLimit, direction);
+    //find_line(passLimit);
+}
+
+//function for the bot to find the line when it moves off it
 int find_line(int passLimit)
 {
     int timeout = 50;
@@ -124,7 +178,7 @@ int find_line(int passLimit)
       {
         
         //Move left
-        move_motors(-80, 80);
+        move_motors(-MOTOR_SPEED, MOTOR_SPEED);
         //Check if we found the tape
         while(counter < timeout)
           {
@@ -142,7 +196,7 @@ int find_line(int passLimit)
         } 
         
         timeout += 50;
-        move_motors(80, -80);
+        move_motors(MOTOR_SPEED, -MOTOR_SPEED);
         
         //Check if we found the tape
         while(counter < timeout)
@@ -168,7 +222,8 @@ int main(void)
     int i = 0;
     //variables
     
-    int state = FORWARD;
+    //int state = FORWARD;
+    int state = BACKWORDS;//FOR TESTING ONLY
     int inter_count = 0;
     int passLimit = 0;
     int passLimit_Right = 0;
@@ -212,11 +267,13 @@ int main(void)
     passLimit = passLimit + check_sensor(LINE_SENSOR);
     passLimit = passLimit / 3;
     
+    //Get the average IR sensor value
     passLimit_Left += check_sensor(LEFT_INTER_SENSOR);
     passLimit_Left += check_sensor(LEFT_INTER_SENSOR);
     passLimit_Left += check_sensor(LEFT_INTER_SENSOR);
     passLimit_Left /= 3;
     
+    //Get the average IR sensor value
     passLimit_Right += check_sensor(RIGHT_INTER_SENSOR);
     passLimit_Right += check_sensor(RIGHT_INTER_SENSOR);
     passLimit_Right += check_sensor(RIGHT_INTER_SENSOR);
@@ -224,12 +281,13 @@ int main(void)
     
     while(stop_button() != 1)
       {
+        //gets the 
         sen_value = check_sensor(LINE_SENSOR);
         switch(state)
           {
             case FORWARD:
               move_motors(70, 70);
-                        
+            
             if(at_intersection(passLimit_Left, passLimit_Right) == 1)
               {
                 state = INTERSECTION;
@@ -254,7 +312,7 @@ int main(void)
             case LIGHT_SEARCH:
               move_motors(70, 70);
             
-              if((sen_value > (passLimit - 10)) && (sen_value < (passLimit + 10)))
+            if((sen_value > (passLimit - 10)) && (sen_value < (passLimit + 10)))
               {
                 light_search_counter++;
             }
@@ -270,21 +328,24 @@ int main(void)
             }
             break;
             case BACKWORDS:
-              move_motors(-70, -70);
-                        
-            if(at_intersection(passLimit_Left, passLimit_Right) == 1)
+              //move_motors(-70, -70);
+              
+              rotate_oneeightzero(passLimit, LEFT);
+              printf("\nReverse\n");
+              state = STOP; //FOR TESTING ONLY
+            /*if(at_intersection(passLimit_Left, passLimit_Right) == 1)
               {
                 printf("\nFound an intersection\n");
                 
                 turn_bot(passLimit, RIGHT);
                 
-                state = FORWARD; //FOR TESTING ONLY
+                
             }
             else if(!(sen_value > (passLimit - 10)) && (sen_value < (passLimit + 10)))
               {
                 find_line(passLimit);
-            }
-              break;
+            }*/
+            break;
             default:
               stop();
             break;
